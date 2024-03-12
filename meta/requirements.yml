@@ -1,0 +1,7 @@
+---
+# name: jam82.firewalld
+# file: meta/requirements.yml
+
+collections: []
+
+roles: []

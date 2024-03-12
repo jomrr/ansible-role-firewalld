@@ -1,0 +1,35 @@
+---
+# name: jam82.ansible-role-firewalld
+# file: molecule/default/molecule.yml
+
+dependency:
+  name: galaxy
+  requirements-file: meta/requirements.yml
+  role-file: meta/requirements.yml
+driver:
+  name: podman
+lint: set -e; ansible-lint
+platforms:
+  - command: null
+    entrypoint: null
+    image: docker.io/${uns:-jam82}/molecule-${img:-fedora}:${tag:-latest}
+    name: firewalld
+    pre_build_image: true
+provisioner:
+  config_options:
+    defaults:
+      callback_whitelist: profile_tasks
+      interpreter_python: auto_silent
+      timer: null
+      yaml: null
+    ssh_connection:
+      pipelining: true
+  log: true
+  name: ansible
+  playbooks:
+    converge: ../resources/playbooks/converge.yml
+    verify: ../resources/playbooks/verify.yml
+scenario:
+  name: default
+verifier:
+  name: ansible

@@ -1,0 +1,47 @@
+---
+# name: jam82.firewalld
+# file: defaults/main.yml
+
+firewalld_custom_services:
+  - name: unifi
+    ports:
+      - port: 8080
+        protocol: tcp  # For device communication
+      - port: 8443
+        protocol: tcp  # Web UI / API
+      - port: 8880
+        protocol: tcp  # HTTP portal redirection
+      - port: 8843
+        protocol: tcp  # HTTPS portal redirection
+      - port: 3478
+        protocol: udp  # STUN service
+
+firewalld_default_zone: public
+
+firewalld_direct_rules:
+  - "-I INPUT -p tcp --dport 80 -m conntrack --ctstate NEW -m limit --limit 25/minute --limit-burst 100 -j ACCEPT"
+  - "-I INPUT -p tcp --dport 443 -m conntrack --ctstate NEW -m limit --limit 25/minute --limit-burst 100 -j ACCEPT"
+
+firewalld_rich_rules:
+  - zone: public
+    rich_rule: 'rule family="ipv4" source address="0.0.0.0/0" service name="http" log prefix="http_access" level="info" limit value="1/m" accept'
+  - zone: public
+    rich_rule: 'rule family="ipv4" source address="0.0.0.0/0" service name="https" log prefix="https_access" level="info" limit value="1/m" accept'
+
+firewalld_zones:
+  - zone: "{{ firewalld_default_zone }}"
+    icmp_block_inversion: false
+    icmp_blocks: []
+    # - echo-reply
+    # - echo-request
+    # - timestamp-reply
+    # - timestamp-request
+    # - address-mask-reply
+    # - address-mask-request
+    interfaces:
+      - "{{ ansible_default_ipv4.interface }}"
+    services:
+      - http
+      - https
+    target: default
+    state: present

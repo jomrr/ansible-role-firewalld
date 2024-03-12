@@ -1,0 +1,65 @@
+---
+# name: jam82.firewalld
+# file: tasks/main.yml
+
+- name: "Ensure firewalld is installed"
+  ansible.builtin.package:
+    name: firewalld
+    state: present
+
+- name: "Ensure firewalld is started and enabled"
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: "Set default firewalld zone"
+  ansible.builtin.command: "firewall-cmd --set-default-zone={{ firewalld_default_zone | default('public') }}"
+  changed_when: false
+  notify: Reload firewalld
+
+- name: "Set default target for zone"
+  ansible.builtin.command:
+    cmd: "firewall-cmd --permanent --zone={{ item.zone }} --set-target={{ item.target }}"
+  loop: "{{ firewalld_zones }}"
+  when: item.target is defined
+  changed_when: false
+  notify: Reload firewalld
+
+- name: "Ensure directory for custom services exists"
+  ansible.builtin.file:
+    path: /etc/firewalld/services
+    state: directory
+    mode: '0750'
+
+- name: "Create custom services"
+  ansible.builtin.template:
+    src: custom_service.xml.j2
+    dest: "/etc/firewalld/services/{{ item.name }}.xml"
+    mode: '0640'
+  loop: "{{ firewalld_custom_services }}"
+  notify: Reload firewalld
+  when: firewalld_custom_services is defined
+
+- name: "Include zone.yml"
+  ansible.builtin.include_tasks: "zone.yml"
+  loop: "{{ firewalld_zones }}"
+
+- name: "Add rich rules"
+  ansible.posix.firewalld:
+    zone: "{{ item.zone }}"
+    rich_rule: "{{ item.rich_rule }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  loop: "{{ firewalld_rich_rules }}"
+  when: firewalld_rich_rules | length > 0
+  notify: Reload firewalld
+
+- name: "Manage direct rules"
+  ansible.builtin.command:
+    cmd: "firewall-cmd --permanent --direct --add-rule {{ item }}"
+  loop: "{{ firewalld_direct_rules }}"
+  when: firewalld_direct_rules | length > 0
+  changed_when: false
+  notify: Reload firewalld
