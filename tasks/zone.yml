@@ -3,6 +3,7 @@
 # file: tasks/zone.yml
 
 - name: "Manage ICMP Blocks"
+  become: true
   ansible.posix.firewalld:
     zone: "{{ item.zone }}"
     icmp_block_inversion: "{{ item.icmp_block_inversion }}"
@@ -16,6 +17,7 @@
   when: "'icmp_blocks' in item"
 
 - name: "Add services to zones"
+  become: true
   ansible.posix.firewalld:
     zone: "{{ item.zone }}"
     service: "{{ service }}"
@@ -28,6 +30,7 @@
   when: "'services' in item"
 
 - name: "Add interfaces to zones"
+  become: true
   ansible.posix.firewalld:
     zone: "{{ item.zone }}"
     interface: "{{ interface }}"
@@ -40,6 +43,7 @@
   when: "'interfaces' in item"
 
 - name: "Add source addresses to zones"
+  become: true
   ansible.posix.firewalld:
     zone: "{{ item.zone }}"
     source: "{{ source_address }}"
