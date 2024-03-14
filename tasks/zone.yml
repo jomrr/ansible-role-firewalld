@@ -21,7 +21,7 @@
   ansible.posix.firewalld:
     zone: "{{ item.zone }}"
     service: "{{ service }}"
-    state: "{{ item.state }}"
+    state: "{{ item.state | replace('present', 'enabled') | replace('absent', 'disabled') }}"
     permanent: true
     immediate: true
   loop: "{{ item.services }}"
@@ -34,7 +34,7 @@
   ansible.posix.firewalld:
     zone: "{{ item.zone }}"
     interface: "{{ interface }}"
-    state: "{{ item.state }}"
+    state: "{{ item.state | replace('present', 'enabled') | replace('absent', 'disabled') }}"
     permanent: true
     immediate: true
   loop: "{{ item.interfaces }}"
@@ -47,7 +47,7 @@
   ansible.posix.firewalld:
     zone: "{{ item.zone }}"
     source: "{{ source_address }}"
-    state: "{{ item.state }}"
+    state: "{{ item.state | replace('present', 'enabled') | replace('absent', 'disabled') }}"
     permanent: true
     immediate: true
   loop: "{{ item.source_addresses }}"

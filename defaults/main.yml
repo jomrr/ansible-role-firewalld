@@ -24,9 +24,9 @@ firewalld_direct_rules:
 
 firewalld_rich_rules:
   - zone: public
-    rich_rule: 'rule family="ipv4" source address="0.0.0.0/0" service name="http" log prefix="http_access" level="info" limit value="1/m" accept'
+    rich_rule: rule family="ipv4" source address="0.0.0.0/0" service name="http" log prefix="http_access" level="info" limit value="1/m" accept
   - zone: public
-    rich_rule: 'rule family="ipv4" source address="0.0.0.0/0" service name="https" log prefix="https_access" level="info" limit value="1/m" accept'
+    rich_rule: rule family="ipv4" source address="0.0.0.0/0" service name="https" log prefix="https_access" level="info" limit value="1/m" accept
 
 firewalld_zones:
   - zone: "{{ firewalld_default_zone }}"

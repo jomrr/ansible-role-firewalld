@@ -10,11 +10,14 @@ driver:
   name: podman
 lint: set -e; ansible-lint
 platforms:
-  - command: null
+  - capabilities:
+      - NET_ADMIN
+    command: null
     entrypoint: null
     image: docker.io/${uns:-jam82}/molecule-${img:-fedora}:${tag:-latest}
     name: firewalld
     pre_build_image: true
+    systemd: always
 provisioner:
   config_options:
     defaults:
