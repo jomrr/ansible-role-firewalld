@@ -16,6 +16,7 @@ This role has no special prerequisites.
 ### System packages (Fedora)
 
 - `python3` (Python 3.8 or later)
+- `python3-nftables`
 
 ### Python (requirements.txt)
 

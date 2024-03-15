@@ -19,17 +19,17 @@ firewalld_rfc3964_ipv4: 'yes'
 firewalld_nftables_flowtable: 'off'
 firewalld_nftables_counters: 'no'
 
-firewalld_direct_rules:
-  - ipv: ipv4
-    table: filter
-    chain: INPUT
-    priority: 0
-    rule: "-p tcp --dport 80 -m conntrack --ctstate NEW -m limit --limit 25/minute --limit-burst 100 -j ACCEPT"
-  - ipv: ipv4
-    table: filter
-    chain: INPUT
-    priority: 0
-    rule: "-p tcp --dport 443 -m conntrack --ctstate NEW -m limit --limit 25/minute --limit-burst 100 -j ACCEPT"
+firewalld_direct_rules: []
+  # - ipv: ipv4
+  #   table: filter
+  #   chain: INPUT
+  #   priority: 0
+  #   rule: "-p tcp --dport 80 -m conntrack --ctstate NEW -m limit --limit 25/minute --limit-burst 100 -j ACCEPT"
+  # - ipv: ipv4
+  #   table: filter
+  #   chain: INPUT
+  #   priority: 0
+  #   rule: "-p tcp --dport 443 -m conntrack --ctstate NEW -m limit --limit 25/minute --limit-burst 100 -j ACCEPT"
 
 firewalld_ipsets: []
   # - name: my_ipset
