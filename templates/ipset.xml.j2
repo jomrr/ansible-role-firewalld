@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ipset type="{{ item.type }}" {% if item.version %}version="{{ item.version }}"{% endif %}>
+{% if item.short %}
+  <short>{{ item.short }}</short>
+{% endif %}
+{% if item.description %}
+  <description>{{ item.description }}</description>
+{% endif %}
+{% for option in item.options %}
+  <option name="{{ option.name }}" {% if option.value %}value="{{ option.value }}"{% endif %}/>
+{% endfor %}
+{% for entry in item.entries %}
+  <entry>{{ entry }}</entry>
+{% endfor %}
+</ipset>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<zone target="{{ item.target | default('default') }}">
+  <short>{{ item.name }}</short>
+  <description>{{ item.description }}</description>
+{% if item.forward | default(false) %}
+  <forward/>
+{% endif %}
+{% for icmp_block in item.icmp_blocks | default([]) %}
+  <icmp-block name="{{ icmp_block }}"/>
+{% endfor %}
+{% if item.icmp_block_inversion | default(false) %}
+  <icmp-block-inversion/>
+{% endif %}
+{% if item.masquerade | default(false) %}
+  <masquerade/>
+{% endif %}
+{% if item.tcp_mss_clamp | default(0) >= 536 %}
+  <tcp-mss-clamp value="{{ item.tcp_mss_clamp }}" />
+{% elif item.tcp_mss_clamp | default(0) > 0 %}
+  <tcp-mss-clamp/>
+{% endif %}
+{% for service in item.services %}
+  <service name="{{ service }}"/>
+{% endfor %}
+{% for port in item.ports %}
+  <port port="{{ port.port }}" protocol="{{ port.protocol }}"/>
+{% endfor %}
+{% for interface in item.interfaces %}
+  <interface name="{{ interface }}"/>
+{% endfor %}
+{% for address in item.source_addresses %}
+  <source address="{{ address }}"/>
+{% endfor %}
+{% for fwd_port in item.forward_ports | default([]) %}
+  <forward-port port="{{ fwd_port.port }}" protocol="{{ fwd_port.protocol }}"{% if fwd_port.to_port %} to-port="{{ fwd_port.to_port }}"{% endif %}{% if fwd_port.to_addr %} to-addr="{{ fwd_port.to_addr }}"{% endif %}/>
+{% endfor %}
+{% for src_port in item.source_ports | default([]) %}
+  <source-port port="{{ src_port.port }}" protocol="{{ src_port.protocol }}"/>
+{% endfor %}
+{% for rule in item.rules %}
+  <rule{% if rule.family is defined %} family="{{ rule.family }}"{% endif %}{% if rule.priority is defined %} priority="{{ rule.priority }}"{% endif %}>
+{% if rule.source is defined %}
+    <source{% if rule.source.address is defined %} address="{{ rule.source.address }}"{% endif %}{% if rule.source.mac is defined %} mac="{{ rule.source.mac }}"{% endif %}{% if rule.source.ipset is defined %} ipset="{{ rule.source.ipset }}"{% endif %}{% if rule.source.invert is defined %} invert="{{ rule.source.invert }}"{% endif %}/>
+{% endif %}
+{% if rule.destination is defined %}
+    <destination{% if rule.destination.address %} address="{{ rule.destination.address }}"{% endif %}{% if rule.destination.ipset %} ipset="{{ rule.destination.ipset }}"{% endif %}{% if rule.destination.invert %} invert="{{ rule.destination.invert }}"{% endif %}/>
+{% endif %}
+{% if rule.service is defined %}
+    <service name="{{ rule.service }}"/>
+{% endif %}
+{% if rule.port is defined %}
+    <port port="{{ rule.port.port }}" protocol="{{ rule.port.protocol }}"/>
+{% endif %}
+{% if rule.protocol is defined %}
+    <protocol value="{{ rule.protocol }}"/>
+{% endif %}
+{% if rule.icmp_block is defined %}
+    <icmp-block name="{{ rule.icmp_block }}"/>
+{% endif %}
+{% if rule.icmp_type is defined %}
+    <icmp-type name="{{ rule.icmp_type }}"/>
+{% endif %}
+{% if rule.masquerade | default(false) %}
+    <masquerade/>
+{% endif %}
+{% if rule.forward_port is defined %}
+    <forward-port port="{{ rule.forward_port.port }}" protocol="{{ rule.forward_port.protocol }}"{% if rule.forward_port.to_port %} to-port="{{ rule.forward_port.to_port }}"{% endif %}{% if rule.forward_port.to_addr %} to-addr="{{ rule.forward_port.to_addr }}"{% endif %}/>
+{% endif %}
+{% if rule.source_port is defined %}
+    <source-port port="{{ rule.source_port.port }}" protocol="{{ rule.source_port.protocol }}"/>
+{% endif %}
+{% if rule.log is defined %}
+    <log{% if rule.log.prefix is defined %} prefix="{{ rule.log.prefix }}"{% endif %}{% if rule.log.level is defined %} level="{{ rule.log.level }}"{% endif %}>
+{% if rule.log.limit is defined %}
+      <limit value="{{ rule.log.limit }}"/>
+{% endif %}
+    </log>
+{% endif %}
+{% if rule.nflog is defined %}
+    <nflog{% if rule.nflog.group is defined %} group="{{ rule.nflog.group }}"{% endif %}{% if rule.nflog.prefix is defined %} prefix="{{ rule.nflog.prefix }}"{% endif %}{% if rule.nflog.queue_size is defined %} queue-size="{{ rule.nflog.queue_size }}"{% endif %}>
+{% if rule.nflog.limit is defined %}
+    <limit value="{{ rule.nflog.limit }}"/>
+{% endif %}
+  </nflog>
+{% endif %}
+{% if rule.audit is defined %}
+    <audit>
+{% if rule.audit.limit is defined %}
+      <limit value="{{ rule.audit.limit }}"/>
+{% endif %}
+    </audit>
+{% endif %}
+{% if rule.action is defined %}
+{% if rule.action.type == 'accept' %}
+{% if rule.action.limit is defined %}
+    <accept>
+      <limit value="{{ rule.action.limit }}"/>
+    </accept>
+{% else %}
+    <accept/>
+{% endif %}
+{% elif rule.action.type == 'reject' %}
+{% if rule.action.limit is defined %}
+    <reject{% if rule.action.type is defined %} type="{{ rule.action.type }}"{% endif %}>
+      <limit value="{{ rule.action.limit }}"/>
+    </reject>
+{% else %}
+    <reject{% if rule.action.type is defined %} type="{{ rule.action.type }}"{% endif %}/>
+{% endif %}
+{% elif rule.action.type == 'drop' %}
+{% if rule.action.limit is defined %}
+    <drop>
+      <limit value="{{ rule.action.limit }}"/>
+    </drop>
+{% else %}
+    <drop/>
+{% endif %}
+{% elif rule.action.type == 'mark' %}
+{% if rule.action.limit is defined %}
+    <mark set="{{ rule.action.mark }}">
+      <limit value="{{ rule.action.limit }}"/>
+    </mark>
+{% else %}
+    <mark set="{{ rule.action.mark }}"/>
+{% endif %}
+{% endif %}
+{% endif %}
+  </rule>
+{% endfor %}
+</zone>

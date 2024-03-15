@@ -8,60 +8,72 @@
     name: firewalld
     state: present
 
+- name: "Ensure directory for custom definitions exist"
+  become: true
+  ansible.builtin.file:
+    path: "/etc/firewalld/{{ item }}"
+    state: directory
+    mode: '0750'
+  loop:
+    - ipsets
+    - policies
+    - services
+    - zones
+
+- name: "Generate firewalld configuration file"
+  become: true
+  ansible.builtin.template:
+    src: firewalld.conf.j2
+    dest: /etc/firewalld/firewalld.conf
+    mode: '0640'
+  notify: Reload firewalld
+
+- name: "Create custom ipsets"
+  become: true
+  ansible.builtin.template:
+    src: ipset.xml.j2
+    dest: "/etc/firewalld/ipsets/{{ item.name }}.xml"
+    mode: '0640'
+  loop: "{{ firewalld_ipsets }}"
+  notify: Reload firewalld
+  when: firewalld_ipsets is defined
+
+- name: "Create custom services"
+  become: true
+  ansible.builtin.template:
+    src: service.xml.j2
+    dest: "/etc/firewalld/services/{{ item.name }}.xml"
+    mode: '0640'
+  loop: "{{ firewalld_services }}"
+  notify: Reload firewalld
+  when: firewalld_services is defined
+
+- name: "Create custom policies"
+  become: true
+  ansible.builtin.template:
+    src: policy.xml.j2
+    dest: "/etc/firewalld/policies/{{ item.name }}.xml"
+    mode: '0640'
+  loop: "{{ firewalld_policies }}"
+  notify: Reload firewalld
+  when: firewalld_policies is defined
+
+- name: "Generate zone definitions"
+  become: true
+  ansible.builtin.template:
+    src: zone.xml.j2
+    dest: "/etc/firewalld/zones/{{ item.name }}.xml"
+    mode: '0640'
+  loop: "{{ firewalld_zones }}"
+  notify: Reload firewalld
+  when: firewalld_zones is defined
+
 - name: "Ensure firewalld is started and enabled"
   become: true
   ansible.builtin.service:
     name: firewalld
     state: started
     enabled: true
-
-- name: "Set default firewalld zone"
-  become: true
-  ansible.builtin.command: "firewall-cmd --set-default-zone={{ firewalld_default_zone | default('public') }}"
-  changed_when: false
-  notify: Reload firewalld
-
-- name: "Set default target for zone"
-  become: true
-  ansible.builtin.command:
-    cmd: "firewall-cmd --permanent --zone={{ item.zone }} --set-target={{ item.target }}"
-  loop: "{{ firewalld_zones }}"
-  when: item.target is defined
-  changed_when: false
-  notify: Reload firewalld
-
-- name: "Ensure directory for custom services exists"
-  become: true
-  ansible.builtin.file:
-    path: /etc/firewalld/services
-    state: directory
-    mode: '0750'
-
-- name: "Create custom services"
-  become: true
-  ansible.builtin.template:
-    src: custom_service.xml.j2
-    dest: "/etc/firewalld/services/{{ item.name }}.xml"
-    mode: '0640'
-  loop: "{{ firewalld_custom_services }}"
-  notify: Reload firewalld
-  when: firewalld_custom_services is defined
-
-- name: "Include zone.yml"
-  ansible.builtin.include_tasks: "zone.yml"
-  loop: "{{ firewalld_zones }}"
-
-- name: "Add rich rules"
-  become: true
-  ansible.posix.firewalld:
-    zone: "{{ item.zone }}"
-    rich_rule: "{{ item.rich_rule }}"
-    state: enabled
-    permanent: true
-    immediate: true
-  loop: "{{ firewalld_rich_rules }}"
-  when: firewalld_rich_rules | length > 0
-  notify: Reload firewalld
 
 - name: "Manage direct rules"
   become: true

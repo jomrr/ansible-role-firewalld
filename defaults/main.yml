@@ -2,34 +2,86 @@
 # name: jam82.firewalld
 # file: defaults/main.yml
 
-firewalld_custom_services:
-  - name: unifi
-    ports:
-      - port: 8080
-        protocol: tcp  # For device communication
-      - port: 8443
-        protocol: tcp  # Web UI / API
-      - port: 8880
-        protocol: tcp  # HTTP portal redirection
-      - port: 8843
-        protocol: tcp  # HTTPS portal redirection
-      - port: 3478
-        protocol: udp  # STUN service
+# firewalld defaults
+firewalld_default_zone: 'public'
+firewalld_cleanup_on_exit: 'yes'
+firewalld_cleanup_modules_on_exit: 'yes'
+firewalld_lockdown: 'no'
+firewalld_ipv6_rpfilter: 'yes'
+firewalld_individual_calls: 'no'
+firewalld_log_denied: 'off'
+firewalld_firewall_backend: 'nftables'
+firewalld_flush_all_on_reload: 'yes'
+firewalld_rfc3964_ipv4: 'yes'
+firewalld_nftables_flowtable: 'off'
+firewalld_nftables_counters: 'no'
 
-firewalld_default_zone: public
+firewalld_direct_rules: []
+  # - "ipv4 filter INPUT 0 -p tcp --dport 80 -m conntrack --ctstate NEW -m limit --limit 25/minute --limit-burst 100 -j ACCEPT"
+  # - "ipv4 filter INPUT 0 -p tcp --dport 443 -m conntrack --ctstate NEW -m limit --limit 25/minute --limit-burst 100 -j ACCEPT"
 
-firewalld_direct_rules:
-  - "-I INPUT -p tcp --dport 80 -m conntrack --ctstate NEW -m limit --limit 25/minute --limit-burst 100 -j ACCEPT"
-  - "-I INPUT -p tcp --dport 443 -m conntrack --ctstate NEW -m limit --limit 25/minute --limit-burst 100 -j ACCEPT"
+firewalld_ipsets: []
+  # - name: my_ipset
+  #   type: "hash:ip"
+  #   version: "1"
+  #   short: "My IPSet"
+  #   description: "An example IPSet"
+  #   options:
+  #     - name: "family"
+  #       value: "inet"
+  #     - name: "timeout"
+  #       value: "3600"
+  #   entries:
+  #     - "192.168.0.1"
+  #     - "192.168.0.2"
 
-firewalld_rich_rules:
-  - zone: public
-    rich_rule: rule family="ipv4" source address="0.0.0.0/0" service name="http" log prefix="http_access" level="info" limit value="1/m" accept
-  - zone: public
-    rich_rule: rule family="ipv4" source address="0.0.0.0/0" service name="https" log prefix="https_access" level="info" limit value="1/m" accept
+firewalld_policies: []
+  # - name: my_policy
+  #   version: "1"
+  #   target: ACCEPT
+  #   priority: 0
+  #   ingress_zone: public
+  #   egress_zone: internal
+  #   short: "Example Policy"
+  #   description: "An example policy for demonstration."
+  #   services: ["http", "https"]
+  #   ports:
+  #     - port: "8080"
+  #       protocol: "tcp"
+  #   protocol: "tcp"
+  #   icmp_blocks: ["echo-reply"]
+  #   masquerade: true
+  #   forward_ports:
+  #     - port: "8080"
+  #       protocol: "tcp"
+  #       to_port: "80"
+  #       to_addr: "192.168.1.100"
+  #   source_ports:
+  #     - port: "8081"
+  #       protocol: "tcp"
+  #   rules: []
+
+firewalld_services: []
+  # - name: unifi
+  #   description: Ubiquiti UniFi Controller
+  #   ports:
+  #     - port: 8080
+  #       protocol: tcp  # For device communication
+  #     - port: 8443
+  #       protocol: tcp  # Web UI / API
+  #     - port: 8880
+  #       protocol: tcp  # HTTP portal redirection
+  #     - port: 8843
+  #       protocol: tcp  # HTTPS portal redirection
+  #     - port: 3478
+  #       protocol: udp  # STUN service
 
 firewalld_zones:
-  - zone: "{{ firewalld_default_zone }}"
+  - name: "{{ firewalld_default_zone }}"
+    description: >-
+      For use in public areas. You do not trust the other computers on networks
+      to not harm your computer. Only selected incoming connections are accepted.
+    forward_ports: []
     icmp_block_inversion: false
     icmp_blocks: []
     # - echo-reply
@@ -40,8 +92,50 @@ firewalld_zones:
     # - address-mask-request
     interfaces:
       - "{{ ansible_default_ipv4.interface }}"
+    masquerade: false
+    ports: []
+    rules: []
+      # - family: ipv4
+      #   source:
+      #     address: "0.0.0.0/0"
+      #   service: http
+      #   log:
+      #     prefix: "http_access"
+      #     level: "info"
+      #     limit: "1/m"
+      #   action:
+      #     type: accept
+      # - family: ipv4
+      #   source:
+      #     address: "0.0.0.0/0"
+      #   service: https
+      #   log:
+      #     prefix: "https_access"
+      #     level: "info"
+      #     limit: "1/m"
+      #   action:
+      #     type: accept
     services:
       - http
       - https
+      - ssh
+    source_addresses: []
+    source_ports: []
     target: default
-    state: present
+    tcp_mss_clamp: 0
+
+  # - name: public
+  #   description: "Public zone"
+  #   target: ACCEPT
+  #   services: [http, https]
+  #   ports: [{port: 8080, protocol: tcp}]
+  #   interfaces: [eth0]
+  #   forward_ports:
+  #     - port: "8080"
+  #       protocol: "tcp"
+  #       to_port: "80"
+  #       to_addr: "192.168.1.100"
+  #   source_ports:
+  #     - port: "3000-4000"
+  #       protocol: "tcp"
+  #   rules: []

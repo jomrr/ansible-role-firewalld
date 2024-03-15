@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <service>
   <short>{{ item.name }}</short>
-  <description>This is a custom service definition for {{ item.name }}.</description>
-  {% for port in item.ports %}
+  <description>{{ item.description | default(item.name + " service") }}.</description>
+{% for port in item.ports %}
   <port protocol="{{ port.protocol }}" port="{{ port.port }}"/>
-  {% endfor %}
+{% endfor %}
 </service>
