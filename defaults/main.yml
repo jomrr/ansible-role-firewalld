@@ -2,6 +2,9 @@
 # name: jam82.firewalld
 # file: defaults/main.yml
 
+# backup configuration files
+firewalld_backup: true
+
 # firewalld defaults
 firewalld_default_zone: 'public'
 firewalld_cleanup_on_exit: 'yes'
@@ -16,9 +19,17 @@ firewalld_rfc3964_ipv4: 'yes'
 firewalld_nftables_flowtable: 'off'
 firewalld_nftables_counters: 'no'
 
-firewalld_direct_rules: []
-  # - "ipv4 filter INPUT 0 -p tcp --dport 80 -m conntrack --ctstate NEW -m limit --limit 25/minute --limit-burst 100 -j ACCEPT"
-  # - "ipv4 filter INPUT 0 -p tcp --dport 443 -m conntrack --ctstate NEW -m limit --limit 25/minute --limit-burst 100 -j ACCEPT"
+firewalld_direct_rules:
+  - ipv: ipv4
+    table: filter
+    chain: INPUT
+    priority: 0
+    rule: "-p tcp --dport 80 -m conntrack --ctstate NEW -m limit --limit 25/minute --limit-burst 100 -j ACCEPT"
+  - ipv: ipv4
+    table: filter
+    chain: INPUT
+    priority: 0
+    rule: "-p tcp --dport 443 -m conntrack --ctstate NEW -m limit --limit 25/minute --limit-burst 100 -j ACCEPT"
 
 firewalld_ipsets: []
   # - name: my_ipset
@@ -122,7 +133,7 @@ firewalld_zones:
     source_addresses: []
     source_ports: []
     target: default
-    tcp_mss_clamp: 0
+    tcp_mss_clamp: 0  # 0 = disabled, 1-535 clamp without value, 536-65535 clamp to value
 
   # - name: public
   #   description: "Public zone"

@@ -26,7 +26,19 @@
     src: firewalld.conf.j2
     dest: /etc/firewalld/firewalld.conf
     mode: '0640'
+    backup: "{{ firewalld_backup | default(true) }}"
   notify: Reload firewalld
+
+- name: "Create direct rules"
+  become: true
+  ansible.builtin.template:
+    src: direct.xml.j2
+    dest: "/etc/firewalld/direct.xml"
+    mode: '0640'
+    backup: "{{ firewalld_backup | default(true) }}"
+  loop: "{{ firewalld_direct_rules }}"
+  notify: Reload firewalld
+  when: firewalld_direct_rules is defined
 
 - name: "Create custom ipsets"
   become: true
@@ -34,6 +46,7 @@
     src: ipset.xml.j2
     dest: "/etc/firewalld/ipsets/{{ item.name }}.xml"
     mode: '0640'
+    backup: "{{ firewalld_backup | default(true) }}"
   loop: "{{ firewalld_ipsets }}"
   notify: Reload firewalld
   when: firewalld_ipsets is defined
@@ -44,6 +57,7 @@
     src: service.xml.j2
     dest: "/etc/firewalld/services/{{ item.name }}.xml"
     mode: '0640'
+    backup: "{{ firewalld_backup | default(true) }}"
   loop: "{{ firewalld_services }}"
   notify: Reload firewalld
   when: firewalld_services is defined
@@ -54,6 +68,7 @@
     src: policy.xml.j2
     dest: "/etc/firewalld/policies/{{ item.name }}.xml"
     mode: '0640'
+    backup: "{{ firewalld_backup | default(true) }}"
   loop: "{{ firewalld_policies }}"
   notify: Reload firewalld
   when: firewalld_policies is defined
@@ -64,6 +79,7 @@
     src: zone.xml.j2
     dest: "/etc/firewalld/zones/{{ item.name }}.xml"
     mode: '0640'
+    backup: "{{ firewalld_backup | default(true) }}"
   loop: "{{ firewalld_zones }}"
   notify: Reload firewalld
   when: firewalld_zones is defined
@@ -74,12 +90,3 @@
     name: firewalld
     state: started
     enabled: true
-
-- name: "Manage direct rules"
-  become: true
-  ansible.builtin.command:
-    cmd: "firewall-cmd --permanent --direct --add-rule {{ item }}"
-  loop: "{{ firewalld_direct_rules }}"
-  when: firewalld_direct_rules | length > 0
-  changed_when: false
-  notify: Reload firewalld
