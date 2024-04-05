@@ -1,5 +1,5 @@
 ---
-# name: jam82.ansible-role-firewalld
+# name: jomrr.ansible-role-firewalld
 # file: molecule/default/molecule.yml
 
 dependency:
@@ -14,7 +14,7 @@ platforms:
       - NET_ADMIN
     command: null
     entrypoint: null
-    image: docker.io/${uns:-jam82}/molecule-${img:-fedora}:${tag:-latest}
+    image: docker.io/${uns:-jomrr}/molecule-${img:-fedora}:${tag:-latest}
     name: firewalld
     pre_build_image: true
     systemd: always

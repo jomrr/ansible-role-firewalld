@@ -5,7 +5,7 @@ description = "Ansible role for setting up firewalld."
 authors = ["Jonas Mauer"]
 license = "MIT"
 keywords = ["firewalld", "firewall", "security", "iptables", "nftables"]
-repository = "https://github.com/jam82/ansible-role-firewalld"
+repository = "https://github.com/jomrr/ansible-role-firewalld"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
