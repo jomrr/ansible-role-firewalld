@@ -1,0 +1,8 @@
+---
+# role: jomrr.firewalld
+# file: meta/requirements.yml
+
+collections:
+  - {'name': 'community.general'}
+
+roles: []
