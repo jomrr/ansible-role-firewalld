@@ -1,19 +1,18 @@
 ---
-# name: jomrr.firewalld
+# role: firewalld
 # file: meta/main.yml
 
 galaxy_info:
-  namespace: jomrr
-  role_name: firewalld
   author: Jonas Mauer
-  company: none
   description: Ansible role for setting up firewalld.
-  license: MIT
-  issue_tracker_url: https://github.com/jomrr/ansible-role-firewalld/issues
-  min_ansible_version: "2.17"
   galaxy_tags:
     - firewalld
     - firewall
     - security
     - iptables
     - nftables
+  issue_tracker_url: https://github.com/jomrr/ansible-role-firewalld/issues
+  license: MIT
+  min_ansible_version: "2.20"
+  namespace: jomrr
+  role_name: firewalld

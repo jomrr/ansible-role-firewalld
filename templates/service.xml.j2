@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Managed by ansible. -->
+<!-- file: {{ template_destpath }} -->
 <service>
-  <short>{{ item.name }}</short>
-  <description>{{ item.description | default(item.name + " service") }}.</description>
-{% for port in item.ports %}
-  <port protocol="{{ port.protocol }}" port="{{ port.port }}"/>
+  <short>{{ __firewalld_item.name | e }}</short>
+  <description>{{ __firewalld_item.description | default(__firewalld_item.name + " service") | e }}.</description>
+{% for __firewalld_port in __firewalld_item.ports %}
+  <port protocol="{{ __firewalld_port.protocol | e }}" port="{{ __firewalld_port.port | e }}"/>
 {% endfor %}
 </service>

@@ -1,90 +1,128 @@
 ---
-# name: jomrr.firewalld
+# role: firewalld
 # file: tasks/main.yml
 
-- name: "Ensure firewalld is installed"
+- name: "FIREWALLD | Validate definition names"
+  ansible.builtin.assert:
+    that:
+      - __firewalld_item.name is match('^[A-Za-z0-9_][A-Za-z0-9_.-]*$')
+    fail_msg: Definition names must contain only letters, digits, underscores, dots, and hyphens.
+    quiet: true
+  loop: "{{ firewalld_ipsets + firewalld_services + firewalld_policies + firewalld_zones }}"
+  loop_control:
+    loop_var: __firewalld_item
+    label: "{{ __firewalld_item.name }}"
+
+- name: "FIREWALLD | Ensure firewalld is installed"
   become: true
   ansible.builtin.package:
     name: firewalld
     state: present
 
-- name: "Ensure directory for custom definitions exist"
+- name: "FIREWALLD | Ensure directories for custom definitions exist"
   become: true
   ansible.builtin.file:
-    path: "/etc/firewalld/{{ item }}"
+    path: "/etc/firewalld/{{ __firewalld_item }}"
     state: directory
+    owner: root
+    group: root
     mode: '0750'
   loop:
     - ipsets
     - policies
     - services
     - zones
+  loop_control:
+    loop_var: __firewalld_item
 
-- name: "Generate firewalld configuration file"
+- name: "FIREWALLD | Generate firewalld configuration file"
   become: true
   ansible.builtin.template:
     src: firewalld.conf.j2
     dest: /etc/firewalld/firewalld.conf
+    owner: root
+    group: root
     mode: '0640'
-    backup: "{{ firewalld_backup | default(true) }}"
-  notify: Reload firewalld
+    backup: "{{ firewalld_backup }}"
+  notify: reload firewall
 
-- name: "Create direct rules"
+- name: "FIREWALLD | Create direct rules"
   become: true
   ansible.builtin.template:
     src: direct.xml.j2
     dest: "/etc/firewalld/direct.xml"
+    owner: root
+    group: root
     mode: '0640'
-    backup: "{{ firewalld_backup | default(true) }}"
-  loop: "{{ firewalld_direct_rules }}"
-  notify: Reload firewalld
-  when: firewalld_direct_rules is defined
+    backup: "{{ firewalld_backup }}"
+  notify: reload firewall
 
-- name: "Create custom ipsets"
+- name: "FIREWALLD | Create custom ipsets"
   become: true
   ansible.builtin.template:
     src: ipset.xml.j2
-    dest: "/etc/firewalld/ipsets/{{ item.name }}.xml"
+    dest: "/etc/firewalld/ipsets/{{ __firewalld_item.name }}.xml"
+    owner: root
+    group: root
     mode: '0640'
-    backup: "{{ firewalld_backup | default(true) }}"
+    backup: "{{ firewalld_backup }}"
   loop: "{{ firewalld_ipsets }}"
-  notify: Reload firewalld
-  when: firewalld_ipsets is defined
+  loop_control:
+    loop_var: __firewalld_item
+    label: "{{ __firewalld_item.name }}"
+  notify: reload firewall
 
-- name: "Create custom services"
+- name: "FIREWALLD | Create custom services"
   become: true
   ansible.builtin.template:
     src: service.xml.j2
-    dest: "/etc/firewalld/services/{{ item.name }}.xml"
+    dest: "/etc/firewalld/services/{{ __firewalld_item.name }}.xml"
+    owner: root
+    group: root
     mode: '0640'
-    backup: "{{ firewalld_backup | default(true) }}"
+    backup: "{{ firewalld_backup }}"
   loop: "{{ firewalld_services }}"
-  notify: Reload firewalld
-  when: firewalld_services is defined
+  loop_control:
+    loop_var: __firewalld_item
+    label: "{{ __firewalld_item.name }}"
+  notify: reload firewall
 
-- name: "Create custom policies"
+- name: "FIREWALLD | Create custom policies"
   become: true
   ansible.builtin.template:
     src: policy.xml.j2
-    dest: "/etc/firewalld/policies/{{ item.name }}.xml"
+    dest: "/etc/firewalld/policies/{{ __firewalld_item.name }}.xml"
+    owner: root
+    group: root
     mode: '0640'
-    backup: "{{ firewalld_backup | default(true) }}"
+    backup: "{{ firewalld_backup }}"
   loop: "{{ firewalld_policies }}"
-  notify: Reload firewalld
-  when: firewalld_policies is defined
+  loop_control:
+    loop_var: __firewalld_item
+    label: "{{ __firewalld_item.name }}"
+  notify: reload firewall
 
-- name: "Generate zone definitions"
+- name: "FIREWALLD | Generate zone definitions"
   become: true
   ansible.builtin.template:
     src: zone.xml.j2
-    dest: "/etc/firewalld/zones/{{ item.name }}.xml"
+    dest: "/etc/firewalld/zones/{{ __firewalld_item.name }}.xml"
+    owner: root
+    group: root
     mode: '0640'
-    backup: "{{ firewalld_backup | default(true) }}"
+    backup: "{{ firewalld_backup }}"
   loop: "{{ firewalld_zones }}"
-  notify: Reload firewalld
-  when: firewalld_zones is defined
+  loop_control:
+    loop_var: __firewalld_item
+    label: "{{ __firewalld_item.name }}"
+  notify: reload firewall
 
-- name: "Ensure firewalld is started and enabled"
+- name: "FIREWALLD | Check permanent configuration"
+  become: true
+  ansible.builtin.command: firewall-offline-cmd --check-config
+  changed_when: false
+
+- name: "FIREWALLD | Ensure firewalld is started and enabled"
   become: true
   ansible.builtin.service:
     name: firewalld

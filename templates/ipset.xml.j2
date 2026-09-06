@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ipset type="{{ item.type }}" {% if item.version %}version="{{ item.version }}"{% endif %}>
-{% if item.short %}
-  <short>{{ item.short }}</short>
+<!-- Managed by ansible. -->
+<!-- file: {{ template_destpath }} -->
+<ipset type="{{ __firewalld_item.type | e }}" {% if __firewalld_item.version is defined %}version="{{ __firewalld_item.version | e }}"{% endif %}>
+{% if __firewalld_item.short is defined %}
+  <short>{{ __firewalld_item.short | e }}</short>
 {% endif %}
-{% if item.description %}
-  <description>{{ item.description }}</description>
+{% if __firewalld_item.description is defined %}
+  <description>{{ __firewalld_item.description | e }}</description>
 {% endif %}
-{% for option in item.options %}
-  <option name="{{ option.name }}" {% if option.value %}value="{{ option.value }}"{% endif %}/>
+{% for __firewalld_option in __firewalld_item.options | default([]) %}
+  <option name="{{ __firewalld_option.name | e }}" {% if __firewalld_option.value is defined %}value="{{ __firewalld_option.value | e }}"{% endif %}/>
 {% endfor %}
-{% for entry in item.entries %}
-  <entry>{{ entry }}</entry>
+{% for __firewalld_entry in __firewalld_item.entries | default([]) %}
+  <entry>{{ __firewalld_entry | e }}</entry>
 {% endfor %}
 </ipset>

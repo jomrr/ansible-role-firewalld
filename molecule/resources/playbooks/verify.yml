@@ -1,12 +1,50 @@
 ---
-# name: jomrr.ansible-role-firewalld
+# role: firewalld
 # file: molecule/resources/playbooks/verify.yml
 
-- name: "PLAYBOOK | Verify"
+- name: "FIREWALLD | Verify active firewall configuration"
   hosts: all
   gather_facts: false
   tasks:
-    - name: "Assert true"
+    - name: "FIREWALLD | Verify daemon state"
+      ansible.builtin.command: firewall-cmd --state
+      changed_when: false
+
+    - name: "FIREWALLD | Gather service state"
+      ansible.builtin.service_facts:
+
+    - name: "FIREWALLD | Verify service enablement"
       ansible.builtin.assert:
-        that: "true"
-        fail_msg: "This should never fail"
+        that: ansible_facts.services['firewalld.service'].status == 'enabled'
+        quiet: true
+
+    - name: "FIREWALLD | Query active definitions"
+      ansible.builtin.command:
+        argv: "{{ __firewalld_query }}"
+      changed_when: false
+      loop:
+        - [firewall-cmd, --zone=public, --query-service=molecule-web]
+        - [firewall-cmd, --ipset=molecule-clients, --query-entry=192.0.2.10]
+        - [firewall-cmd, --policy=molecule-egress, --query-port=18443/tcp]
+        - [firewall-cmd, --zone=public, '--query-rich-rule=rule family="ipv4" source ipset="molecule-clients" reject']
+        - - firewall-cmd
+          - --policy=molecule-egress
+          - >-
+            --query-rich-rule=rule family="ipv4" destination address="198.51.100.10"
+            reject type="icmp-host-prohibited"
+        - [firewall-cmd, --zone=public, '--query-rich-rule=rule tcp-mss-clamp value="1400"']
+      loop_control:
+        loop_var: __firewalld_query
+        label: "{{ __firewalld_query | join(' ') }}"
+
+    - name: "FIREWALLD | Read the active service definition"
+      ansible.builtin.command: firewall-cmd --info-service=molecule-web
+      changed_when: false
+      register: __firewalld_service
+
+    - name: "FIREWALLD | Verify the service definition was restored"
+      ansible.builtin.assert:
+        that:
+          - "'18080/tcp' in __firewalld_service.stdout"
+          - "'18082/tcp' not in __firewalld_service.stdout"
+        quiet: true

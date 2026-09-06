@@ -1,6 +1,6 @@
 ---
 # role: firewalld
-# file: molecule/default/molecule.yml
+# file: molecule/dev/molecule.yml
 
 dependency:
   name: "galaxy"
@@ -88,10 +88,60 @@ scenario:
     - "idempotence"
     - "verify"
     - "destroy"
-  name: "default"
+  name: "dev"
 platforms:
-  - name: "firewalld"
-    image: "docker.io/${uns:-jomrr}/molecule-${img:-fedora}:${tag:-latest}"
+  - name: "almalinux-latest-firewalld"
+    image: "docker.io/jomrr/molecule-almalinux:latest"
+    pre_build_image: true
+    override_command: false
+    systemd: true
+    security_opts:
+      - "label=disable"
+    capabilities:
+      - "NET_ADMIN"
+      - "SYS_ADMIN"
+  - name: "debian-latest-firewalld"
+    image: "docker.io/jomrr/molecule-debian:latest"
+    pre_build_image: true
+    override_command: false
+    systemd: true
+    security_opts:
+      - "label=disable"
+    capabilities:
+      - "NET_ADMIN"
+      - "SYS_ADMIN"
+  - name: "fedora-latest-firewalld"
+    image: "docker.io/jomrr/molecule-fedora:latest"
+    pre_build_image: true
+    override_command: false
+    systemd: true
+    security_opts:
+      - "label=disable"
+    capabilities:
+      - "NET_ADMIN"
+      - "SYS_ADMIN"
+  - name: "opensuse-leap-latest-firewalld"
+    image: "docker.io/jomrr/molecule-opensuse-leap:latest"
+    pre_build_image: true
+    override_command: false
+    systemd: true
+    security_opts:
+      - "label=disable"
+    capabilities:
+      - "NET_ADMIN"
+      - "SYS_ADMIN"
+  - name: "opensuse-tumbleweed-latest-firewalld"
+    image: "docker.io/jomrr/molecule-opensuse-tumbleweed:latest"
+    pre_build_image: true
+    override_command: false
+    systemd: true
+    security_opts:
+      - "label=disable"
+    capabilities:
+      - "NET_ADMIN"
+      - "SYS_ADMIN"
+  - name: "ubuntu-latest-firewalld"
+    image: "docker.io/jomrr/molecule-ubuntu:latest"
     pre_build_image: true
     override_command: false
     systemd: true

@@ -1,127 +1,129 @@
 <?xml version="1.0" encoding="utf-8"?>
-<zone target="{{ item.target | default('default') }}">
-  <short>{{ item.name }}</short>
-  <description>{{ item.description }}</description>
-{% if item.forward | default(false) %}
+<!-- Managed by ansible. -->
+<!-- file: {{ template_destpath }} -->
+<zone{% if __firewalld_item.target | default('default') != 'default' %} target="{{ __firewalld_item.target | e }}"{% endif %}>
+  <short>{{ __firewalld_item.name | e }}</short>
+  <description>{{ __firewalld_item.description | default(__firewalld_item.name) | e }}</description>
+{% if __firewalld_item.forward | default(false) %}
   <forward/>
 {% endif %}
-{% for icmp_block in item.icmp_blocks | default([]) %}
-  <icmp-block name="{{ icmp_block }}"/>
+{% for __firewalld_icmp_block in __firewalld_item.icmp_blocks | default([]) %}
+  <icmp-block name="{{ __firewalld_icmp_block | e }}"/>
 {% endfor %}
-{% if item.icmp_block_inversion | default(false) %}
+{% if __firewalld_item.icmp_block_inversion | default(false) %}
   <icmp-block-inversion/>
 {% endif %}
-{% if item.masquerade | default(false) %}
+{% if __firewalld_item.masquerade | default(false) %}
   <masquerade/>
 {% endif %}
-{% if item.tcp_mss_clamp | default(0) >= 536 %}
-  <tcp-mss-clamp value="{{ item.tcp_mss_clamp }}" />
-{% elif item.tcp_mss_clamp | default(0) > 0 %}
-  <tcp-mss-clamp/>
+{% if __firewalld_item.tcp_mss_clamp | default(0) >= 536 %}
+  <rule><tcp-mss-clamp value="{{ __firewalld_item.tcp_mss_clamp | e }}"/></rule>
+{% elif __firewalld_item.tcp_mss_clamp | default(0) > 0 %}
+  <rule><tcp-mss-clamp/></rule>
 {% endif %}
-{% for service in item.services %}
-  <service name="{{ service }}"/>
+{% for __firewalld_service in __firewalld_item.services | default([]) %}
+  <service name="{{ __firewalld_service | e }}"/>
 {% endfor %}
-{% for port in item.ports %}
-  <port port="{{ port.port }}" protocol="{{ port.protocol }}"/>
+{% for __firewalld_port in __firewalld_item.ports | default([]) %}
+  <port port="{{ __firewalld_port.port | e }}" protocol="{{ __firewalld_port.protocol | e }}"/>
 {% endfor %}
-{% for interface in item.interfaces %}
-  <interface name="{{ interface }}"/>
+{% for __firewalld_interface in __firewalld_item.interfaces | default([]) %}
+  <interface name="{{ __firewalld_interface | e }}"/>
 {% endfor %}
-{% for address in item.source_addresses %}
-  <source address="{{ address }}"/>
+{% for __firewalld_address in __firewalld_item.source_addresses | default([]) %}
+  <source address="{{ __firewalld_address | e }}"/>
 {% endfor %}
-{% for fwd_port in item.forward_ports | default([]) %}
-  <forward-port port="{{ fwd_port.port }}" protocol="{{ fwd_port.protocol }}"{% if fwd_port.to_port %} to-port="{{ fwd_port.to_port }}"{% endif %}{% if fwd_port.to_addr %} to-addr="{{ fwd_port.to_addr }}"{% endif %}/>
+{% for __firewalld_fwd_port in __firewalld_item.forward_ports | default([]) %}
+  <forward-port port="{{ __firewalld_fwd_port.port | e }}" protocol="{{ __firewalld_fwd_port.protocol | e }}"{% if __firewalld_fwd_port.to_port is defined %} to-port="{{ __firewalld_fwd_port.to_port | e }}"{% endif %}{% if __firewalld_fwd_port.to_addr is defined %} to-addr="{{ __firewalld_fwd_port.to_addr | e }}"{% endif %}/>
 {% endfor %}
-{% for src_port in item.source_ports | default([]) %}
-  <source-port port="{{ src_port.port }}" protocol="{{ src_port.protocol }}"/>
+{% for __firewalld_src_port in __firewalld_item.source_ports | default([]) %}
+  <source-port port="{{ __firewalld_src_port.port | e }}" protocol="{{ __firewalld_src_port.protocol | e }}"/>
 {% endfor %}
-{% for rule in item.rules %}
-  <rule{% if rule.family is defined %} family="{{ rule.family }}"{% endif %}{% if rule.priority is defined %} priority="{{ rule.priority }}"{% endif %}>
-{% if rule.source is defined %}
-    <source{% if rule.source.address is defined %} address="{{ rule.source.address }}"{% endif %}{% if rule.source.mac is defined %} mac="{{ rule.source.mac }}"{% endif %}{% if rule.source.ipset is defined %} ipset="{{ rule.source.ipset }}"{% endif %}{% if rule.source.invert is defined %} invert="{{ rule.source.invert }}"{% endif %}/>
+{% for __firewalld_rule in __firewalld_item.rules | default([]) %}
+  <rule{% if __firewalld_rule.family is defined %} family="{{ __firewalld_rule.family | e }}"{% endif %}{% if __firewalld_rule.priority is defined %} priority="{{ __firewalld_rule.priority | e }}"{% endif %}>
+{% if __firewalld_rule.source is defined %}
+    <source{% if __firewalld_rule.source.address is defined %} address="{{ __firewalld_rule.source.address | e }}"{% endif %}{% if __firewalld_rule.source.mac is defined %} mac="{{ __firewalld_rule.source.mac | e }}"{% endif %}{% if __firewalld_rule.source.ipset is defined %} ipset="{{ __firewalld_rule.source.ipset | e }}"{% endif %}{% if __firewalld_rule.source.invert is defined %} invert="{{ __firewalld_rule.source.invert | e }}"{% endif %}/>
 {% endif %}
-{% if rule.destination is defined %}
-    <destination{% if rule.destination.address %} address="{{ rule.destination.address }}"{% endif %}{% if rule.destination.ipset %} ipset="{{ rule.destination.ipset }}"{% endif %}{% if rule.destination.invert %} invert="{{ rule.destination.invert }}"{% endif %}/>
+{% if __firewalld_rule.destination is defined %}
+    <destination{% if __firewalld_rule.destination.address is defined %} address="{{ __firewalld_rule.destination.address | e }}"{% endif %}{% if __firewalld_rule.destination.ipset is defined %} ipset="{{ __firewalld_rule.destination.ipset | e }}"{% endif %}{% if __firewalld_rule.destination.invert is defined %} invert="{{ __firewalld_rule.destination.invert | e }}"{% endif %}/>
 {% endif %}
-{% if rule.service is defined %}
-    <service name="{{ rule.service }}"/>
+{% if __firewalld_rule.service is defined %}
+    <service name="{{ __firewalld_rule.service | e }}"/>
 {% endif %}
-{% if rule.port is defined %}
-    <port port="{{ rule.port.port }}" protocol="{{ rule.port.protocol }}"/>
+{% if __firewalld_rule.port is defined %}
+    <port port="{{ __firewalld_rule.port.port | e }}" protocol="{{ __firewalld_rule.port.protocol | e }}"/>
 {% endif %}
-{% if rule.protocol is defined %}
-    <protocol value="{{ rule.protocol }}"/>
+{% if __firewalld_rule.protocol is defined %}
+    <protocol value="{{ __firewalld_rule.protocol | e }}"/>
 {% endif %}
-{% if rule.icmp_block is defined %}
-    <icmp-block name="{{ rule.icmp_block }}"/>
+{% if __firewalld_rule.icmp_block is defined %}
+    <icmp-block name="{{ __firewalld_rule.icmp_block | e }}"/>
 {% endif %}
-{% if rule.icmp_type is defined %}
-    <icmp-type name="{{ rule.icmp_type }}"/>
+{% if __firewalld_rule.icmp_type is defined %}
+    <icmp-type name="{{ __firewalld_rule.icmp_type | e }}"/>
 {% endif %}
-{% if rule.masquerade | default(false) %}
+{% if __firewalld_rule.masquerade | default(false) %}
     <masquerade/>
 {% endif %}
-{% if rule.forward_port is defined %}
-    <forward-port port="{{ rule.forward_port.port }}" protocol="{{ rule.forward_port.protocol }}"{% if rule.forward_port.to_port %} to-port="{{ rule.forward_port.to_port }}"{% endif %}{% if rule.forward_port.to_addr %} to-addr="{{ rule.forward_port.to_addr }}"{% endif %}/>
+{% if __firewalld_rule.forward_port is defined %}
+    <forward-port port="{{ __firewalld_rule.forward_port.port | e }}" protocol="{{ __firewalld_rule.forward_port.protocol | e }}"{% if __firewalld_rule.forward_port.to_port is defined %} to-port="{{ __firewalld_rule.forward_port.to_port | e }}"{% endif %}{% if __firewalld_rule.forward_port.to_addr is defined %} to-addr="{{ __firewalld_rule.forward_port.to_addr | e }}"{% endif %}/>
 {% endif %}
-{% if rule.source_port is defined %}
-    <source-port port="{{ rule.source_port.port }}" protocol="{{ rule.source_port.protocol }}"/>
+{% if __firewalld_rule.source_port is defined %}
+    <source-port port="{{ __firewalld_rule.source_port.port | e }}" protocol="{{ __firewalld_rule.source_port.protocol | e }}"/>
 {% endif %}
-{% if rule.log is defined %}
-    <log{% if rule.log.prefix is defined %} prefix="{{ rule.log.prefix }}"{% endif %}{% if rule.log.level is defined %} level="{{ rule.log.level }}"{% endif %}>
-{% if rule.log.limit is defined %}
-      <limit value="{{ rule.log.limit }}"/>
+{% if __firewalld_rule.log is defined %}
+    <log{% if __firewalld_rule.log.prefix is defined %} prefix="{{ __firewalld_rule.log.prefix | e }}"{% endif %}{% if __firewalld_rule.log.level is defined %} level="{{ __firewalld_rule.log.level | e }}"{% endif %}>
+{% if __firewalld_rule.log.limit is defined %}
+      <limit value="{{ __firewalld_rule.log.limit | e }}"/>
 {% endif %}
     </log>
 {% endif %}
-{% if rule.nflog is defined %}
-    <nflog{% if rule.nflog.group is defined %} group="{{ rule.nflog.group }}"{% endif %}{% if rule.nflog.prefix is defined %} prefix="{{ rule.nflog.prefix }}"{% endif %}{% if rule.nflog.queue_size is defined %} queue-size="{{ rule.nflog.queue_size }}"{% endif %}>
-{% if rule.nflog.limit is defined %}
-    <limit value="{{ rule.nflog.limit }}"/>
+{% if __firewalld_rule.nflog is defined %}
+    <nflog{% if __firewalld_rule.nflog.group is defined %} group="{{ __firewalld_rule.nflog.group | e }}"{% endif %}{% if __firewalld_rule.nflog.prefix is defined %} prefix="{{ __firewalld_rule.nflog.prefix | e }}"{% endif %}{% if __firewalld_rule.nflog.queue_size is defined %} queue-size="{{ __firewalld_rule.nflog.queue_size | e }}"{% endif %}>
+{% if __firewalld_rule.nflog.limit is defined %}
+    <limit value="{{ __firewalld_rule.nflog.limit | e }}"/>
 {% endif %}
   </nflog>
 {% endif %}
-{% if rule.audit is defined %}
+{% if __firewalld_rule.audit is defined %}
     <audit>
-{% if rule.audit.limit is defined %}
-      <limit value="{{ rule.audit.limit }}"/>
+{% if __firewalld_rule.audit.limit is defined %}
+      <limit value="{{ __firewalld_rule.audit.limit | e }}"/>
 {% endif %}
     </audit>
 {% endif %}
-{% if rule.action is defined %}
-{% if rule.action.type == 'accept' %}
-{% if rule.action.limit is defined %}
+{% if __firewalld_rule.action is defined %}
+{% if __firewalld_rule.action.type == 'accept' %}
+{% if __firewalld_rule.action.limit is defined %}
     <accept>
-      <limit value="{{ rule.action.limit }}"/>
+      <limit value="{{ __firewalld_rule.action.limit | e }}"/>
     </accept>
 {% else %}
     <accept/>
 {% endif %}
-{% elif rule.action.type == 'reject' %}
-{% if rule.action.limit is defined %}
-    <reject{% if rule.action.type is defined %} type="{{ rule.action.type }}"{% endif %}>
-      <limit value="{{ rule.action.limit }}"/>
+{% elif __firewalld_rule.action.type == 'reject' %}
+{% if __firewalld_rule.action.limit is defined %}
+    <reject{% if __firewalld_rule.action.reject_type is defined %} type="{{ __firewalld_rule.action.reject_type | e }}"{% endif %}>
+      <limit value="{{ __firewalld_rule.action.limit | e }}"/>
     </reject>
 {% else %}
-    <reject{% if rule.action.type is defined %} type="{{ rule.action.type }}"{% endif %}/>
+    <reject{% if __firewalld_rule.action.reject_type is defined %} type="{{ __firewalld_rule.action.reject_type | e }}"{% endif %}/>
 {% endif %}
-{% elif rule.action.type == 'drop' %}
-{% if rule.action.limit is defined %}
+{% elif __firewalld_rule.action.type == 'drop' %}
+{% if __firewalld_rule.action.limit is defined %}
     <drop>
-      <limit value="{{ rule.action.limit }}"/>
+      <limit value="{{ __firewalld_rule.action.limit | e }}"/>
     </drop>
 {% else %}
     <drop/>
 {% endif %}
-{% elif rule.action.type == 'mark' %}
-{% if rule.action.limit is defined %}
-    <mark set="{{ rule.action.mark }}">
-      <limit value="{{ rule.action.limit }}"/>
+{% elif __firewalld_rule.action.type == 'mark' %}
+{% if __firewalld_rule.action.limit is defined %}
+    <mark set="{{ __firewalld_rule.action.mark | e }}">
+      <limit value="{{ __firewalld_rule.action.limit | e }}"/>
     </mark>
 {% else %}
-    <mark set="{{ rule.action.mark }}"/>
+    <mark set="{{ __firewalld_rule.action.mark | e }}"/>
 {% endif %}
 {% endif %}
 {% endif %}

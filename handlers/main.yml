@@ -1,8 +1,10 @@
 ---
-# name: jomrr.firewalld
+# role: firewalld
 # file: handlers/main.yml
 
-- name: Reload firewalld
+- name: "FIREWALLD | Reload firewalld"
+  become: true
   ansible.builtin.service:
     name: firewalld
     state: reloaded
+  listen: reload firewall

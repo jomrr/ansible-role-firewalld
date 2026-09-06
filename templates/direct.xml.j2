@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Managed by ansible. -->
+<!-- file: {{ template_destpath }} -->
 <direct>
-{% for rule in firewalld_direct_rules %}
-  <rule ipv="{{ rule.ipv }}" table="{{ rule.table }}" chain="{{ rule.chain }}" priority="{{ rule.priority }}">{{ rule.rule }}</rule>
+{% for __firewalld_rule in firewalld_direct_rules %}
+  <rule ipv="{{ __firewalld_rule.ipv | e }}" table="{{ __firewalld_rule.table | e }}" chain="{{ __firewalld_rule.chain | e }}" priority="{{ __firewalld_rule.priority | e }}">{{ __firewalld_rule.rule | e }}</rule>
 {% endfor %}
 </direct>

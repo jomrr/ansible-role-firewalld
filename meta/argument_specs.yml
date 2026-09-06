@@ -1,0 +1,957 @@
+---
+# role: firewalld
+# file: meta/argument_specs.yml
+
+argument_specs:
+  main:
+    short_description: Install, configure, enable, and start firewalld.
+    options:
+      firewalld_backup:
+        type: bool
+        description:
+          - Back up configuration files before replacing them.
+        default: true
+      firewalld_default_zone:
+        type: str
+        description:
+          - Zone used for connections without an explicit zone assignment.
+        default: public
+      firewalld_cleanup_on_exit:
+        type: str
+        description:
+          - Remove firewall rules when the daemon stops.
+        default: 'yes'
+        choices:
+          - 'yes'
+          - 'no'
+      firewalld_cleanup_modules_on_exit:
+        type: str
+        description:
+          - Unload firewall kernel modules when the daemon stops.
+        default: 'yes'
+        choices:
+          - 'yes'
+          - 'no'
+      firewalld_lockdown:
+        type: str
+        description:
+          - Restrict D-Bus changes to the lockdown whitelist on versions supporting lockdown.
+        default: 'no'
+        choices:
+          - 'yes'
+          - 'no'
+      firewalld_ipv6_rpfilter:
+        type: str
+        description:
+          - IPv6 reverse-path filtering mode.
+        default: 'yes'
+      firewalld_individual_calls:
+        type: str
+        description:
+          - Use individual rule calls on versions supporting this option.
+        default: 'no'
+        choices:
+          - 'yes'
+          - 'no'
+      firewalld_log_denied:
+        type: str
+        description:
+          - Packet classes logged before rejection or dropping.
+        default: 'off'
+        choices:
+          - 'off'
+          - all
+          - unicast
+          - broadcast
+          - multicast
+      firewalld_firewall_backend:
+        type: str
+        description:
+          - Backend used by firewalld.
+        default: nftables
+        choices:
+          - nftables
+          - iptables
+      firewalld_flush_all_on_reload:
+        type: str
+        description:
+          - Flush runtime rules when permanent configuration is reloaded.
+        default: 'yes'
+        choices:
+          - 'yes'
+          - 'no'
+      firewalld_rfc3964_ipv4:
+        type: str
+        description:
+          - Filter IPv6 6to4 destinations containing non-public IPv4 addresses.
+        default: 'yes'
+        choices:
+          - 'yes'
+          - 'no'
+      firewalld_nftables_flowtable:
+        type: str
+        description:
+          - Space-separated flowtable interfaces, or off to disable flowtables.
+        default: 'off'
+      firewalld_nftables_counters:
+        type: str
+        description:
+          - Add counters to nftables rules.
+        default: 'no'
+        choices:
+          - 'yes'
+          - 'no'
+      firewalld_policy_target:
+        type: str
+        description:
+          - Default action for traffic not matched by a policy rule.
+        default: CONTINUE
+        choices:
+          - CONTINUE
+          - ACCEPT
+          - REJECT
+          - DROP
+      firewalld_direct_rules:
+        type: list
+        description:
+          - Complete direct rule list; an empty list clears direct.xml.
+        default: []
+        elements: dict
+        options:
+          ipv:
+            type: str
+            description:
+              - Address family.
+            required: true
+            choices:
+              - ipv4
+              - ipv6
+              - eb
+          table:
+            type: str
+            description:
+              - Netfilter table.
+            required: true
+          chain:
+            type: str
+            description:
+              - Netfilter chain.
+            required: true
+          rule:
+            type: str
+            description:
+              - Direct rule arguments.
+            required: true
+          priority:
+            type: int
+            description:
+              - Direct rule priority.
+            required: true
+      firewalld_ipsets:
+        type: list
+        description:
+          - IPset definitions written under /etc/firewalld/ipsets.
+        default: []
+        elements: dict
+        options:
+          name:
+            type: str
+            description:
+              - Definition file basename.
+            required: true
+          type:
+            type: str
+            description:
+              - IPset type.
+            required: true
+          version:
+            type: str
+            description:
+              - Definition version.
+          short:
+            type: str
+            description:
+              - Short description.
+          description:
+            type: str
+            description:
+              - Description text.
+          options:
+            type: list
+            description:
+              - IPset options.
+            elements: dict
+            options:
+              name:
+                type: str
+                description:
+                  - Option name.
+                required: true
+              value:
+                type: str
+                description:
+                  - Option value.
+          entries:
+            type: list
+            description:
+              - IPset entries.
+            elements: str
+      firewalld_policies:
+        type: list
+        description:
+          - Policy definitions with optional per-policy target overrides.
+        default: []
+        elements: dict
+        options:
+          name:
+            type: str
+            description:
+              - Definition file basename.
+            required: true
+          description:
+            type: str
+            description:
+              - Description text.
+          services:
+            type: list
+            description:
+              - Allowed service names.
+            elements: str
+          ports:
+            type: list
+            description:
+              - Allowed destination ports.
+            elements: dict
+            options:
+              port:
+                type: str
+                description:
+                  - Port number or range.
+                required: true
+              protocol:
+                type: str
+                description:
+                  - Transport protocol.
+                required: true
+                choices:
+                  - tcp
+                  - udp
+                  - sctp
+                  - dccp
+          icmp_blocks:
+            type: list
+            description:
+              - ICMP types to block.
+            elements: str
+          masquerade:
+            type: bool
+            description:
+              - Enable masquerading.
+          forward_ports:
+            type: list
+            description:
+              - Port forwarding entries.
+            elements: dict
+            options:
+              port:
+                type: str
+                description:
+                  - Port number or range.
+                required: true
+              protocol:
+                type: str
+                description:
+                  - Transport protocol.
+                required: true
+                choices:
+                  - tcp
+                  - udp
+                  - sctp
+                  - dccp
+              to_port:
+                type: str
+                description:
+                  - Destination port or range.
+              to_addr:
+                type: str
+                description:
+                  - Destination address.
+          source_ports:
+            type: list
+            description:
+              - Allowed source ports.
+            elements: dict
+            options:
+              port:
+                type: str
+                description:
+                  - Port number or range.
+                required: true
+              protocol:
+                type: str
+                description:
+                  - Transport protocol.
+                required: true
+                choices:
+                  - tcp
+                  - udp
+                  - sctp
+                  - dccp
+          rules:
+            type: list
+            description:
+              - Rich rules.
+            elements: dict
+            options:
+              family:
+                type: str
+                description:
+                  - Address family.
+                choices:
+                  - ipv4
+                  - ipv6
+              priority:
+                type: int
+                description:
+                  - Rich rule priority.
+              source:
+                type: dict
+                description:
+                  - Source match.
+                options:
+                  address:
+                    type: str
+                    description:
+                      - Source address or network.
+                  mac:
+                    type: str
+                    description:
+                      - Source MAC address.
+                  ipset:
+                    type: str
+                    description:
+                      - Source IPset name.
+                  invert:
+                    type: bool
+                    description:
+                      - Invert the source match.
+              destination:
+                type: dict
+                description:
+                  - Destination match.
+                options:
+                  address:
+                    type: str
+                    description:
+                      - Destination address or network.
+                  ipset:
+                    type: str
+                    description:
+                      - Destination IPset name.
+                  invert:
+                    type: bool
+                    description:
+                      - Invert the destination match.
+              service:
+                type: str
+                description:
+                  - Service name.
+              port:
+                type: dict
+                description:
+                  - Destination port match.
+                options:
+                  port:
+                    type: str
+                    description:
+                      - Port number or range.
+                    required: true
+                  protocol:
+                    type: str
+                    description:
+                      - Transport protocol.
+                    required: true
+                    choices:
+                      - tcp
+                      - udp
+                      - sctp
+                      - dccp
+              protocol:
+                type: str
+                description:
+                  - IP protocol name or number.
+              icmp_block:
+                type: str
+                description:
+                  - ICMP type to block.
+              icmp_type:
+                type: str
+                description:
+                  - ICMP type to match.
+              masquerade:
+                type: bool
+                description:
+                  - Enable masquerading.
+              forward_port:
+                type: dict
+                description:
+                  - Port forwarding.
+                options:
+                  port:
+                    type: str
+                    description:
+                      - Port number or range.
+                    required: true
+                  protocol:
+                    type: str
+                    description:
+                      - Transport protocol.
+                    required: true
+                    choices:
+                      - tcp
+                      - udp
+                      - sctp
+                      - dccp
+                  to_port:
+                    type: str
+                    description:
+                      - Destination port or range.
+                  to_addr:
+                    type: str
+                    description:
+                      - Destination address.
+              source_port:
+                type: dict
+                description:
+                  - Source port match.
+                options:
+                  port:
+                    type: str
+                    description:
+                      - Port number or range.
+                    required: true
+                  protocol:
+                    type: str
+                    description:
+                      - Transport protocol.
+                    required: true
+                    choices:
+                      - tcp
+                      - udp
+                      - sctp
+                      - dccp
+              log:
+                type: dict
+                description:
+                  - Kernel logging.
+                options:
+                  limit:
+                    type: str
+                    description:
+                      - Maximum matches per time interval.
+                  prefix:
+                    type: str
+                    description:
+                      - Log prefix.
+                  level:
+                    type: str
+                    description:
+                      - Log level.
+              nflog:
+                type: dict
+                description:
+                  - Netlink logging.
+                options:
+                  limit:
+                    type: str
+                    description:
+                      - Maximum matches per time interval.
+                  group:
+                    type: int
+                    description:
+                      - Netlink group.
+                  prefix:
+                    type: str
+                    description:
+                      - Log prefix.
+                  queue_size:
+                    type: int
+                    description:
+                      - Queue threshold.
+              audit:
+                type: dict
+                description:
+                  - Audit logging.
+                options:
+                  limit:
+                    type: str
+                    description:
+                      - Maximum matches per time interval.
+              action:
+                type: dict
+                description:
+                  - Action for matching traffic.
+                options:
+                  limit:
+                    type: str
+                    description:
+                      - Maximum matches per time interval.
+                  type:
+                    type: str
+                    description:
+                      - Action name.
+                    required: true
+                    choices:
+                      - accept
+                      - reject
+                      - drop
+                      - mark
+                  reject_type:
+                    type: str
+                    description:
+                      - Optional ICMP reject type; omitted for the native default.
+                  mark:
+                    type: str
+                    description:
+                      - Packet mark and optional mask.
+          version:
+            type: str
+            description:
+              - Definition version.
+          short:
+            type: str
+            description:
+              - Short description.
+          target:
+            type: str
+            description:
+              - Unmatched traffic action; defaults to firewalld_policy_target.
+            choices:
+              - CONTINUE
+              - ACCEPT
+              - REJECT
+              - DROP
+          priority:
+            type: int
+            description:
+              - Nonzero priority relative to zones.
+          ingress_zone:
+            type: str
+            description:
+              - Ingress zone, HOST, or ANY.
+            required: true
+          egress_zone:
+            type: str
+            description:
+              - Egress zone, HOST, or ANY.
+            required: true
+          protocol:
+            type: str
+            description:
+              - Allowed IP protocol.
+      firewalld_services:
+        type: list
+        description:
+          - Custom service definitions and their ports.
+        default: []
+        elements: dict
+        options:
+          name:
+            type: str
+            description:
+              - Definition file basename.
+            required: true
+          description:
+            type: str
+            description:
+              - Description text.
+          ports:
+            type: list
+            description:
+              - Service destination ports.
+            elements: dict
+            options:
+              port:
+                type: str
+                description:
+                  - Port number or range.
+                required: true
+              protocol:
+                type: str
+                description:
+                  - Transport protocol.
+                required: true
+                choices:
+                  - tcp
+                  - udp
+                  - sctp
+                  - dccp
+            required: true
+      firewalld_zones:
+        type: list
+        description:
+          - Zone definitions; unlisted definition files are retained.
+        default:
+          - name: '{{ firewalld_default_zone }}'
+            description: For use in public areas. You do not trust the other computers on
+              networks to not harm your computer. Only selected incoming connections are
+              accepted.
+            forward_ports: []
+            icmp_block_inversion: false
+            icmp_blocks: []
+            interfaces:
+              - '{{ ansible_facts.default_ipv4.interface }}'
+            masquerade: false
+            ports: []
+            rules: []
+            services:
+              - ssh
+            source_addresses: []
+            source_ports: []
+            target: default
+            tcp_mss_clamp: 0
+        elements: dict
+        options:
+          name:
+            type: str
+            description:
+              - Definition file basename.
+            required: true
+          description:
+            type: str
+            description:
+              - Description text.
+          services:
+            type: list
+            description:
+              - Allowed service names.
+            elements: str
+          ports:
+            type: list
+            description:
+              - Allowed destination ports.
+            elements: dict
+            options:
+              port:
+                type: str
+                description:
+                  - Port number or range.
+                required: true
+              protocol:
+                type: str
+                description:
+                  - Transport protocol.
+                required: true
+                choices:
+                  - tcp
+                  - udp
+                  - sctp
+                  - dccp
+          icmp_blocks:
+            type: list
+            description:
+              - ICMP types to block.
+            elements: str
+          masquerade:
+            type: bool
+            description:
+              - Enable masquerading.
+          forward_ports:
+            type: list
+            description:
+              - Port forwarding entries.
+            elements: dict
+            options:
+              port:
+                type: str
+                description:
+                  - Port number or range.
+                required: true
+              protocol:
+                type: str
+                description:
+                  - Transport protocol.
+                required: true
+                choices:
+                  - tcp
+                  - udp
+                  - sctp
+                  - dccp
+              to_port:
+                type: str
+                description:
+                  - Destination port or range.
+              to_addr:
+                type: str
+                description:
+                  - Destination address.
+          source_ports:
+            type: list
+            description:
+              - Allowed source ports.
+            elements: dict
+            options:
+              port:
+                type: str
+                description:
+                  - Port number or range.
+                required: true
+              protocol:
+                type: str
+                description:
+                  - Transport protocol.
+                required: true
+                choices:
+                  - tcp
+                  - udp
+                  - sctp
+                  - dccp
+          rules:
+            type: list
+            description:
+              - Rich rules.
+            elements: dict
+            options:
+              family:
+                type: str
+                description:
+                  - Address family.
+                choices:
+                  - ipv4
+                  - ipv6
+              priority:
+                type: int
+                description:
+                  - Rich rule priority.
+              source:
+                type: dict
+                description:
+                  - Source match.
+                options:
+                  address:
+                    type: str
+                    description:
+                      - Source address or network.
+                  mac:
+                    type: str
+                    description:
+                      - Source MAC address.
+                  ipset:
+                    type: str
+                    description:
+                      - Source IPset name.
+                  invert:
+                    type: bool
+                    description:
+                      - Invert the source match.
+              destination:
+                type: dict
+                description:
+                  - Destination match.
+                options:
+                  address:
+                    type: str
+                    description:
+                      - Destination address or network.
+                  ipset:
+                    type: str
+                    description:
+                      - Destination IPset name.
+                  invert:
+                    type: bool
+                    description:
+                      - Invert the destination match.
+              service:
+                type: str
+                description:
+                  - Service name.
+              port:
+                type: dict
+                description:
+                  - Destination port match.
+                options:
+                  port:
+                    type: str
+                    description:
+                      - Port number or range.
+                    required: true
+                  protocol:
+                    type: str
+                    description:
+                      - Transport protocol.
+                    required: true
+                    choices:
+                      - tcp
+                      - udp
+                      - sctp
+                      - dccp
+              protocol:
+                type: str
+                description:
+                  - IP protocol name or number.
+              icmp_block:
+                type: str
+                description:
+                  - ICMP type to block.
+              icmp_type:
+                type: str
+                description:
+                  - ICMP type to match.
+              masquerade:
+                type: bool
+                description:
+                  - Enable masquerading.
+              forward_port:
+                type: dict
+                description:
+                  - Port forwarding.
+                options:
+                  port:
+                    type: str
+                    description:
+                      - Port number or range.
+                    required: true
+                  protocol:
+                    type: str
+                    description:
+                      - Transport protocol.
+                    required: true
+                    choices:
+                      - tcp
+                      - udp
+                      - sctp
+                      - dccp
+                  to_port:
+                    type: str
+                    description:
+                      - Destination port or range.
+                  to_addr:
+                    type: str
+                    description:
+                      - Destination address.
+              source_port:
+                type: dict
+                description:
+                  - Source port match.
+                options:
+                  port:
+                    type: str
+                    description:
+                      - Port number or range.
+                    required: true
+                  protocol:
+                    type: str
+                    description:
+                      - Transport protocol.
+                    required: true
+                    choices:
+                      - tcp
+                      - udp
+                      - sctp
+                      - dccp
+              log:
+                type: dict
+                description:
+                  - Kernel logging.
+                options:
+                  limit:
+                    type: str
+                    description:
+                      - Maximum matches per time interval.
+                  prefix:
+                    type: str
+                    description:
+                      - Log prefix.
+                  level:
+                    type: str
+                    description:
+                      - Log level.
+              nflog:
+                type: dict
+                description:
+                  - Netlink logging.
+                options:
+                  limit:
+                    type: str
+                    description:
+                      - Maximum matches per time interval.
+                  group:
+                    type: int
+                    description:
+                      - Netlink group.
+                  prefix:
+                    type: str
+                    description:
+                      - Log prefix.
+                  queue_size:
+                    type: int
+                    description:
+                      - Queue threshold.
+              audit:
+                type: dict
+                description:
+                  - Audit logging.
+                options:
+                  limit:
+                    type: str
+                    description:
+                      - Maximum matches per time interval.
+              action:
+                type: dict
+                description:
+                  - Action for matching traffic.
+                options:
+                  limit:
+                    type: str
+                    description:
+                      - Maximum matches per time interval.
+                  type:
+                    type: str
+                    description:
+                      - Action name.
+                    required: true
+                    choices:
+                      - accept
+                      - reject
+                      - drop
+                      - mark
+                  reject_type:
+                    type: str
+                    description:
+                      - Optional ICMP reject type; omitted for the native default.
+                  mark:
+                    type: str
+                    description:
+                      - Packet mark and optional mask.
+          target:
+            type: str
+            description:
+              - Unmatched traffic action.
+            choices:
+              - default
+              - ACCEPT
+              - '%%REJECT%%'
+              - DROP
+          forward:
+            type: bool
+            description:
+              - Allow forwarding within the zone.
+          icmp_block_inversion:
+            type: bool
+            description:
+              - Invert ICMP block selection.
+          interfaces:
+            type: list
+            description:
+              - Interface names.
+            elements: str
+          source_addresses:
+            type: list
+            description:
+              - Source addresses or networks.
+            elements: str
+          tcp_mss_clamp:
+            type: int
+            description:
+              - Zero disables clamping; 1 through 535 use path MTU; larger values set the
+                MSS.

@@ -1,0 +1,38 @@
+---
+# role: firewalld
+# file: molecule/resources/playbooks/side_effect.yml
+
+- name: "FIREWALLD | Exercise changes on an existing firewall"
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: "FIREWALLD | Change a service definition"
+      ansible.builtin.include_role:
+        name: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}"
+      vars:
+        firewalld_services:
+          - name: molecule-web
+            ports:
+              - port: '18082'
+                protocol: tcp
+
+    - name: "FIREWALLD | Apply pending changes"
+      ansible.builtin.meta: flush_handlers
+
+    - name: "FIREWALLD | Read the changed active service definition"
+      ansible.builtin.command: firewall-cmd --info-service=molecule-web
+      changed_when: false
+      register: __firewalld_service
+
+    - name: "FIREWALLD | Verify the handler activated the changed service"
+      ansible.builtin.assert:
+        that:
+          - "'18082/tcp' in __firewalld_service.stdout"
+          - "'18080/tcp' not in __firewalld_service.stdout"
+        quiet: true
+
+    - name: "FIREWALLD | Stop and disable firewalld"
+      ansible.builtin.service:
+        name: firewalld
+        state: stopped
+        enabled: false

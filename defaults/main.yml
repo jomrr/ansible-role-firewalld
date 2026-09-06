@@ -1,24 +1,39 @@
 ---
-# name: jomrr.firewalld
+# role: firewalld
 # file: defaults/main.yml
 
-# backup configuration files
+# Back up configuration files before replacing them.
 firewalld_backup: true
 
-# firewalld defaults
+# Zone used for connections without an explicit zone assignment.
 firewalld_default_zone: 'public'
+# Remove firewall rules when the daemon stops.
 firewalld_cleanup_on_exit: 'yes'
+# Unload firewall kernel modules when the daemon stops.
 firewalld_cleanup_modules_on_exit: 'yes'
+# Restrict D-Bus changes to the lockdown whitelist on versions supporting lockdown.
 firewalld_lockdown: 'no'
+# IPv6 reverse-path filtering mode.
 firewalld_ipv6_rpfilter: 'yes'
+# Use individual rule calls on versions supporting this option.
 firewalld_individual_calls: 'no'
+# Packet classes logged before rejection or dropping.
 firewalld_log_denied: 'off'
+# Backend used by firewalld.
 firewalld_firewall_backend: 'nftables'
+# Flush runtime rules when permanent configuration is reloaded.
 firewalld_flush_all_on_reload: 'yes'
+# Filter IPv6 6to4 destinations containing non-public IPv4 addresses.
 firewalld_rfc3964_ipv4: 'yes'
+# Space-separated flowtable interfaces, or off to disable flowtables.
 firewalld_nftables_flowtable: 'off'
+# Add counters to nftables rules.
 firewalld_nftables_counters: 'no'
 
+# Default action for traffic not matched by a policy rule.
+firewalld_policy_target: 'CONTINUE'
+
+# Complete direct rule list; an empty list clears direct.xml.
 firewalld_direct_rules: []
   # - ipv: ipv4
   #   table: filter
@@ -31,6 +46,7 @@ firewalld_direct_rules: []
   #   priority: 0
   #   rule: "-p tcp --dport 443 -m conntrack --ctstate NEW -m limit --limit 25/minute --limit-burst 100 -j ACCEPT"
 
+# IPset definitions written under /etc/firewalld/ipsets.
 firewalld_ipsets: []
   # - name: my_ipset
   #   type: "hash:ip"
@@ -46,11 +62,12 @@ firewalld_ipsets: []
   #     - "192.168.0.1"
   #     - "192.168.0.2"
 
+# Policy definitions with optional per-policy target overrides.
 firewalld_policies: []
   # - name: my_policy
   #   version: "1"
   #   target: ACCEPT
-  #   priority: 0
+  #   priority: -1
   #   ingress_zone: public
   #   egress_zone: internal
   #   short: "Example Policy"
@@ -72,6 +89,7 @@ firewalld_policies: []
   #       protocol: "tcp"
   #   rules: []
 
+# Custom service definitions and their ports.
 firewalld_services: []
   # - name: unifi
   #   description: Ubiquiti UniFi Controller
@@ -87,6 +105,7 @@ firewalld_services: []
   #     - port: 3478
   #       protocol: udp  # STUN service
 
+# Zone definitions; unlisted definition files are retained.
 firewalld_zones:
   - name: "{{ firewalld_default_zone }}"
     description: >-
@@ -102,7 +121,7 @@ firewalld_zones:
     # - address-mask-reply
     # - address-mask-request
     interfaces:
-      - "{{ ansible_default_ipv4.interface }}"
+      - "{{ ansible_facts.default_ipv4.interface }}"
     masquerade: false
     ports: []
     rules: []
@@ -127,8 +146,6 @@ firewalld_zones:
       #   action:
       #     type: accept
     services:
-      - http
-      - https
       - ssh
     source_addresses: []
     source_ports: []
