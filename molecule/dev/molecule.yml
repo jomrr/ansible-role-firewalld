@@ -94,7 +94,7 @@ platforms:
     image: "docker.io/jomrr/molecule-almalinux:latest"
     pre_build_image: true
     override_command: false
-    systemd: true
+    systemd: "true"
     security_opts:
       - "label=disable"
     capabilities:
@@ -104,7 +104,7 @@ platforms:
     image: "docker.io/jomrr/molecule-debian:latest"
     pre_build_image: true
     override_command: false
-    systemd: true
+    systemd: "true"
     security_opts:
       - "label=disable"
     capabilities:
@@ -114,7 +114,7 @@ platforms:
     image: "docker.io/jomrr/molecule-fedora:latest"
     pre_build_image: true
     override_command: false
-    systemd: true
+    systemd: "true"
     security_opts:
       - "label=disable"
     capabilities:
@@ -124,7 +124,7 @@ platforms:
     image: "docker.io/jomrr/molecule-opensuse-leap:latest"
     pre_build_image: true
     override_command: false
-    systemd: true
+    systemd: "true"
     security_opts:
       - "label=disable"
     capabilities:
@@ -134,7 +134,7 @@ platforms:
     image: "docker.io/jomrr/molecule-opensuse-tumbleweed:latest"
     pre_build_image: true
     override_command: false
-    systemd: true
+    systemd: "true"
     security_opts:
       - "label=disable"
     capabilities:
@@ -144,7 +144,7 @@ platforms:
     image: "docker.io/jomrr/molecule-ubuntu:latest"
     pre_build_image: true
     override_command: false
-    systemd: true
+    systemd: "true"
     security_opts:
       - "label=disable"
     capabilities:
